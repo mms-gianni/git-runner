@@ -20,7 +20,7 @@ func addDefaultOptions(cli *clif.Cli) {
 }
 
 func main() {
-	cli := clif.New("git-project", "DEV-VERSION", "Manage your github projects with git cli")
+	cli := clif.New("git-runner", "DEV-VERSION", "Manage your github runners with git cli")
 
 	var OwnStyles = map[string]string{
 		"error":     "\033[31;1m",

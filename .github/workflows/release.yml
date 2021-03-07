@@ -46,8 +46,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./cmd/git-project/git-project.linux.64bit
-        asset_name: git-project.linux.64bit
+        asset_path: ./cmd/git-runner/git-runner.linux.64bit
+        asset_name: git-runner.linux.64bit
         asset_content_type: application/x-binary
     - name: Upload mac binary
       id: upload-release-mac-asset 
@@ -56,8 +56,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./cmd/git-project/git-project.mac.64bit
-        asset_name: git-project.mac.64bit
+        asset_path: ./cmd/git-runner/git-runner.mac.64bit
+        asset_name: git-runner.mac.64bit
         asset_content_type: application/x-binary
     - name: Upload windows binary
       id: upload-release-windows-asset 
@@ -66,13 +66,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./cmd/git-project/git-project.windows.64bit
-        asset_name: git-project.windows.64bit
+        asset_path: ./cmd/git-runner/git-runner.windows.64bit
+        asset_name: git-runner.windows.64bit
         asset_content_type: application/x-binary
     - name: Add and push binaries
       run: |
-        git config --global user.email "gicara+gitproject@gmail.com"
+        git config --global user.email "gicara+gitrunner@gmail.com"
         git config --global user.name "Build Job"
-        git add cmd/git-project/*.64bit
+        git add cmd/git-runner/*.64bit
         git commit -m "added rebuilded binaries"
         git push origin HEAD:master

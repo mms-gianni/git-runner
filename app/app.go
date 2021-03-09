@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v33/github"
@@ -29,20 +30,60 @@ func login(c *clif.Command) *github.Client {
 	return client
 }
 
-func Run(c *clif.Command, out clif.Output) {
+func Run(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 	o = out
+	var runnerDestination map[string]string
+	runnerDestination = make(map[string]string)
+	var orgs []string
+
+	if c.Option("organisations").String() != "" {
+		organisations := c.Option("organisations").String()
+		orgs = strings.Split(organisations, ",")
+		for i := 0; i < len(orgs); i++ {
+			runnerDestination[strconv.Itoa(i+1)] = "Orga: " + orgs[i]
+		}
+	}
 
 	_, repo := GetGitdir()
+
 	if repo != nil {
+		repodetails := getRepodetails(repo)
+		runnerDestination[strconv.Itoa(len(runnerDestination)+1)] = "Repo: " + repodetails.name + "/" + repodetails.name
+	}
+
+	selectedDestination := "1"
+
+	if len(runnerDestination) > 1 {
+		selectedDestination = in.Choose("where do you want to start the runner: ", runnerDestination)
+	}
+
+	selectedDestI, _ := strconv.Atoi(selectedDestination)
+	if repo != nil && selectedDestI > len(orgs) {
 		repodetails := getRepodetails(repo)
 		downloads, _, _ := client.Actions.ListRunnerApplicationDownloads(ctx, repodetails.owner, repodetails.name)
 
-		repoToke, _, _ := client.Actions.CreateRegistrationToken(ctx, repodetails.owner, repodetails.name)
+		token, _, _ := client.Actions.CreateRegistrationToken(ctx, repodetails.owner, repodetails.name)
 		url := "https://github.com/" + repodetails.owner + "/" + repodetails.name
 		for _, download := range downloads {
 			if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
-				runOnDarwin(out, download, url, repoToke)
+				out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+				runOnDarwin(out, download, url, token)
+			}
+		}
+	}
+
+	if selectedDestI <= len(orgs) {
+		fmt.Println(strconv.Itoa(selectedDestI - 1))
+		owner := orgs[selectedDestI-1]
+		downloads, _, _ := client.Actions.ListOrganizationRunnerApplicationDownloads(ctx, owner)
+
+		token, _, _ := client.Actions.CreateOrganizationRegistrationToken(ctx, owner)
+		url := "https://github.com/" + owner
+		for _, download := range downloads {
+			if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
+				out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+				runOnDarwin(out, download, url, token)
 			}
 		}
 	}
@@ -52,7 +93,7 @@ func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, ur
 	var err error
 	var msg string
 
-	fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
+	//fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
 
 	msg = "Download runner binaries"
 	out.Printf("    run: %s", msg)

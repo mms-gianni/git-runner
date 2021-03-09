@@ -54,7 +54,7 @@ func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, ur
 
 	fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
 
-	msg = "Dwonload runner binaries"
+	msg = "Download runner binaries"
 	out.Printf("    run: %s", msg)
 	err = downloadRunner(download.GetDownloadURL(), "/tmp/runner.osx.tar.gz")
 	if err == nil {

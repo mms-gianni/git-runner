@@ -36,6 +36,8 @@ func main() {
 		"online":    "\U00002705",
 		"offline":   "\U0001F480",
 		"busy":      "\U0001F525",
+		"ok":        "\U00002705",
+		"err":       "\U000026D4",
 	}
 
 	cli.SetOutput(clif.NewColorOutput(os.Stdout).SetFormatter(clif.NewDefaultFormatter(OwnStyles)))

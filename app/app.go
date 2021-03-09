@@ -42,37 +42,87 @@ func Run(c *clif.Command, out clif.Output) {
 		url := "https://github.com/" + repodetails.owner + "/" + repodetails.name
 		for _, download := range downloads {
 			if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
-				fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
-				downloadRunner(download.GetDownloadURL(), "/tmp/runner.osx.tar.gz")
-				runOnDarwin(out, url, repoToke)
+				runOnDarwin(out, download, url, repoToke)
 			}
 		}
 	}
 }
 
-func runOnDarwin(out clif.Output, url string, token *github.RegistrationToken) {
-	out.Printf("run: rm -fv /tmp/runner.osx")
-	exec.Command("rm", "-rf", "/tmp/runner.osx").Run()
-	out.Printf("    => Done\n")
+func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
+	var err error
+	var msg string
 
-	out.Printf("run: mkdir /tmp/runner.osx")
-	exec.Command("mkdir", "/tmp/runner.osx").Run()
-	out.Printf("    => Done\n")
+	fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
 
-	out.Printf("run: tar -xzf /tmp/runner.osx.tar.gz -C /tmp/runner.osx")
-	exec.Command("tar", "-xzf", "/tmp/runner.osx.tar.gz", "-C", "/tmp/runner.osx").Run()
-	out.Printf("    => Done\n")
+	msg = "Dwonload runner binaries"
+	out.Printf("    run: %s", msg)
+	err = downloadRunner(download.GetDownloadURL(), "/tmp/runner.osx.tar.gz")
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
 
-	out.Printf("run: rm -f /tmp/runner.osx.tar.gz")
-	exec.Command("rm", "-f", "/tmp/runner.osx.tar.gz").Run()
+	msg = "rm -rf /tmp/runner.osx"
+	out.Printf("    run: %s", msg)
+	err = exec.Command("rm", "-rf", "/tmp/runner.osx").Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
 
-	out.Printf("run: /tmp/runner.osx/config.sh --url %s --token %s", url, token.GetToken())
-	exec.Command("/tmp/runner.osx/config.sh", "--url", url, "--token", token.GetToken()).Run()
-	out.Printf("    => Done\n")
+	msg = "mkdir /tmp/runner.osx"
+	out.Printf("    run: %s", msg)
+	err = exec.Command("mkdir", "/tmp/runner.osx").Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
 
-	out.Printf("run: /tmp/runner.osx/run.sh")
-	exec.Command("/tmp/runner.osx/run.sh").Run()
-	out.Printf("    => Done\n")
+	msg = "tar -xzf /tmp/runner.osx.tar.gz -C /tmp/runner.osx"
+	out.Printf("    run: %s", msg)
+	err = exec.Command("tar", "-xzf", "/tmp/runner.osx.tar.gz", "-C", "/tmp/runner.osx").Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
+
+	msg = "rm -f /tmp/runner.osx.tar.gz"
+	out.Printf("    run: %s", msg)
+	err = exec.Command("rm", "-f", "/tmp/runner.osx.tar.gz").Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
+
+	msg = "/tmp/runner.osx/config.sh --url " + url + " --token " + token.GetToken()
+	out.Printf("    run: %s", msg)
+	err = exec.Command("/tmp/runner.osx/config.sh", "--url", url, "--token", token.GetToken()).Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		return
+	}
+
+	msg = "/tmp/runner.osx/run.sh"
+	out.Printf("    run: %s", msg)
+	err = exec.Command("/tmp/runner.osx/run.sh").Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", msg)
+	} else {
+		out.Printf("\r <err> run: %s => %s\n", msg, err)
+		return
+	}
 }
 
 func downloadRunner(url string, filepath string) error {

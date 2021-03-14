@@ -145,9 +145,9 @@ func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, ur
 		return
 	}
 
-	msg = "/tmp/runner.osx/config.sh --url " + url + " --token " + token.GetToken()
+	msg = "/tmp/runner.osx/config.sh --unattended --replace --url " + url + " --token " + token.GetToken()
 	out.Printf("    run: %s", msg)
-	err = exec.Command("/tmp/runner.osx/config.sh", "--url", url, "--token", token.GetToken()).Run()
+	err = exec.Command("/tmp/runner.osx/config.sh", "--unattended", "--replace", "--url", url, "--token", token.GetToken()).Run()
 	if err == nil {
 		out.Printf("\r <ok> run: %s\n", msg)
 	} else {
@@ -157,12 +157,29 @@ func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, ur
 
 	msg = "/tmp/runner.osx/run.sh"
 	out.Printf("    run: %s", msg)
-	err = exec.Command("/tmp/runner.osx/run.sh").Run()
+	cmd := exec.Command("/tmp/runner.osx/run.sh")
+
+	stdout, _ := cmd.StdoutPipe()
+	err = cmd.Start()
+
 	if err == nil {
 		out.Printf("\r <ok> run: %s\n", msg)
 	} else {
 		out.Printf("\r <err> run: %s => %s\n", msg, err)
 		return
+	}
+
+	buf := make([]byte, 1024)
+	for {
+		n, err := stdout.Read(buf)
+		if err != nil {
+			break
+		}
+		out.Printf(string(buf[0:n]))
+	}
+
+	if err := cmd.Wait(); err != nil {
+		out.Printf("\r <err> run: %s => %s\n", msg, err)
 	}
 }
 

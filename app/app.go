@@ -65,12 +65,7 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateRegistrationToken(ctx, repodetails.owner, repodetails.name)
 		url := "https://github.com/" + repodetails.owner + "/" + repodetails.name
-		for _, download := range downloads {
-			if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
-				out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-				runOnDarwin(out, download, url, token)
-			}
-		}
+		runOnOs(out, downloads, url, token)
 	}
 
 	if selectedDestI <= len(orgs) {
@@ -80,16 +75,23 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateOrganizationRegistrationToken(ctx, owner)
 		url := "https://github.com/" + owner
-		for _, download := range downloads {
-			if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
-				out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-				runOnDarwin(out, download, url, token)
-			}
+		runOnOs(out, downloads, url, token)
+	}
+}
+
+func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
+	for _, download := range downloads {
+		// https://stackoverflow.com/questions/20728767/all-possible-goos-value
+		// possible GetOS values: osx, linux, win
+		// possible GetArchitecture values: x64, arm, arm64
+		if (download.GetOS() == "osx" || download.GetOS() == "linux") && (runtime.GOOS == "darwin" || runtime.GOOS == "linux") {
+			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+			runOnPosix(out, download, url, token)
 		}
 	}
 }
 
-func runOnDarwin(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
+func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
 	var err error
 	var msg string
 

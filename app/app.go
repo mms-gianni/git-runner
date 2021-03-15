@@ -206,7 +206,7 @@ func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url
 			out.Printf("\r <err> run: %s => %s\n", msg, err)
 		}
 	} else {
-		out.Printf("run 'pgrep Runner.Listener' to find PID")
+		out.Printf("run 'kill $(pgrep Runner.Listener)' to remove the runner")
 	}
 }
 

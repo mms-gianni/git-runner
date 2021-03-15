@@ -10,7 +10,7 @@ func cmdKill() *clif.Command {
 		githubcommands.Kill(c, out)
 	}
 
-	return clif.NewCommand("kill", "Kill local runner if running", cb)
+	return clif.NewCommand("kill", "Kill local runner", cb)
 }
 
 func init() {

@@ -29,6 +29,27 @@ func login(c *clif.Command) *github.Client {
 	return client
 }
 
+func Kill(c *clif.Command, out clif.Output) {
+	o = out
+
+	cmd := exec.Command("pgrep", "Runner.Listener")
+	pid, err := cmd.Output()
+	if err != nil {
+		out.Printf(" <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
+		return
+	}
+
+	cmd = exec.Command("kill", string(pid[:len(pid)-1]))
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
+	if err == nil {
+		out.Printf("\r <ok> run: %s\n", cmd.String())
+	} else {
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
+		return
+	}
+}
+
 func Run(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 	o = out

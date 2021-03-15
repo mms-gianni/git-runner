@@ -114,81 +114,80 @@ func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url
 
 func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool) {
 	var err error
-	var msg string
+	var cmd *exec.Cmd
 
 	//fmt.Println(download.GetArchitecture(), download.GetOS(), runtime.GOOS, runtime.GOARCH)
 
-	msg = "Download runner binaries"
+	msg := "curl -O -L " + download.GetDownloadURL()
 	out.Printf("    run: %s", msg)
-	err = downloadRunner(download.GetDownloadURL(), "/tmp/runner.osx.tar.gz")
+	err = downloadRunner(download.GetDownloadURL(), "/tmp/github_runner.tar.gz")
 	if err == nil {
 		out.Printf("\r <ok> run: %s\n", msg)
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", msg, err)
 		return
 	}
 
-	msg = "rm -rf /tmp/runner.osx"
-	out.Printf("    run: %s", msg)
-	err = exec.Command("rm", "-rf", "/tmp/runner.osx").Run()
+	cmd = exec.Command("rm", "-rf", "/tmp/github_runner")
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
 		return
 	}
 
-	msg = "mkdir /tmp/runner.osx"
-	out.Printf("    run: %s", msg)
-	err = exec.Command("mkdir", "/tmp/runner.osx").Run()
+	cmd = exec.Command("mkdir", "/tmp/github_runner")
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
 		return
 	}
 
-	msg = "tar -xzf /tmp/runner.osx.tar.gz -C /tmp/runner.osx"
-	out.Printf("    run: %s", msg)
-	err = exec.Command("tar", "-xzf", "/tmp/runner.osx.tar.gz", "-C", "/tmp/runner.osx").Run()
+	cmd = exec.Command("tar", "-xzf", "/tmp/github_runner.tar.gz", "-C", "/tmp/github_runner")
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
 		return
 	}
 
-	msg = "rm -f /tmp/runner.osx.tar.gz"
-	out.Printf("    run: %s", msg)
-	err = exec.Command("rm", "-f", "/tmp/runner.osx.tar.gz").Run()
+	cmd = exec.Command("rm", "-f", "/tmp/github_runner.tar.gz")
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
 		return
 	}
 
-	msg = "/tmp/runner.osx/config.sh --unattended --replace --url " + url + " --token " + token.GetToken()
-	out.Printf("    run: %s", msg)
-	err = exec.Command("/tmp/runner.osx/config.sh", "--unattended", "--replace", "--url", url, "--token", token.GetToken()).Run()
+	cmd = exec.Command("/tmp/github_runner/config.sh", "--unattended", "--replace", "--url", url, "--token", token.GetToken())
+	out.Printf("    run: %s", cmd.String())
+	err = cmd.Run()
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => <error>%s\n", msg, err)
+		out.Printf("\r <err> run: %s => <error>%s<reset>\n", cmd.String(), err)
 		return
 	}
 
-	msg = "/tmp/runner.osx/run.sh"
-	out.Printf("    run: %s", msg)
-	cmd := exec.Command("/tmp/runner.osx/run.sh")
+	cmd = exec.Command("/tmp/github_runner/run.sh")
+	out.Printf("    run: %s", cmd.String())
 
 	stdout, _ := cmd.StdoutPipe()
 	err = cmd.Start()
 
 	if err == nil {
-		out.Printf("\r <ok> run: %s\n", msg)
+		out.Printf("\r <ok> run: %s\n", cmd.String())
 	} else {
-		out.Printf("\r <err> run: %s => %s\n", msg, err)
+		out.Printf("\r <err> run: %s => %s\n", cmd.String(), err)
 		return
 	}
 
@@ -203,7 +202,7 @@ func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url
 		}
 
 		if err := cmd.Wait(); err != nil {
-			out.Printf("\r <err> run: %s => %s\n", msg, err)
+			out.Printf("\r <err> run: %s => %s\n", cmd.String(), err)
 		}
 	} else {
 		out.Printf("run 'kill $(pgrep Runner.Listener)' to remove the runner")

@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -71,7 +70,6 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 	}
 
 	if selectedDestI <= len(orgs) {
-		fmt.Println(strconv.Itoa(selectedDestI - 1))
 		owner := orgs[selectedDestI-1]
 		downloads, _, _ := client.Actions.ListOrganizationRunnerApplicationDownloads(ctx, owner)
 

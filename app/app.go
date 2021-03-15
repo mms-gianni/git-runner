@@ -37,6 +37,8 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 	runnerDestination = make(map[string]string)
 	var orgs []string
 
+	detached := c.Option("detached").IsFlag().Bool()
+
 	if c.Option("organisations").String() != "" {
 		organisations := c.Option("organisations").String()
 		orgs = strings.Split(organisations, ",")
@@ -65,7 +67,7 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateRegistrationToken(ctx, repodetails.owner, repodetails.name)
 		url := "https://github.com/" + repodetails.owner + "/" + repodetails.name
-		runOnOs(out, downloads, url, token)
+		runOnOs(out, downloads, url, token, detached)
 	}
 
 	if selectedDestI <= len(orgs) {
@@ -75,23 +77,44 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateOrganizationRegistrationToken(ctx, owner)
 		url := "https://github.com/" + owner
-		runOnOs(out, downloads, url, token)
+		runOnOs(out, downloads, url, token, detached)
 	}
 }
 
-func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
+func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool) {
 	for _, download := range downloads {
 		// https://stackoverflow.com/questions/20728767/all-possible-goos-value
 		// possible GetOS values: osx, linux, win
 		// possible GetArchitecture values: x64, arm, arm64
-		if (download.GetOS() == "osx" || download.GetOS() == "linux") && (runtime.GOOS == "darwin" || runtime.GOOS == "linux") {
+		if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
 			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-			runOnPosix(out, download, url, token)
+			runOnPosix(out, download, url, token, detached)
+			break
+		}
+		if download.GetOS() == "linux" && download.GetArchitecture() == "x64" && runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
+			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+			runOnPosix(out, download, url, token, detached)
+			break
+		}
+		if download.GetOS() == "linux" && download.GetArchitecture() == "arm" && runtime.GOOS == "linux" && runtime.GOARCH == "arn" {
+			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+			runOnPosix(out, download, url, token, detached)
+			break
+		}
+		if download.GetOS() == "linux" && download.GetArchitecture() == "arm64" && runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
+			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+			runOnPosix(out, download, url, token, detached)
+			break
+		}
+		if download.GetOS() == "win" && download.GetArchitecture() == "x64" && runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
+			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
+			out.Printf("===> Sorry not implemented yet")
+			break
 		}
 	}
 }
 
-func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken) {
+func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool) {
 	var err error
 	var msg string
 
@@ -171,17 +194,21 @@ func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url
 		return
 	}
 
-	buf := make([]byte, 1024)
-	for {
-		n, err := stdout.Read(buf)
-		if err != nil {
-			break
+	if !detached {
+		buf := make([]byte, 1024)
+		for {
+			n, err := stdout.Read(buf)
+			if err != nil {
+				break
+			}
+			out.Printf(string(buf[0:n]))
 		}
-		out.Printf(string(buf[0:n]))
-	}
 
-	if err := cmd.Wait(); err != nil {
-		out.Printf("\r <err> run: %s => %s\n", msg, err)
+		if err := cmd.Wait(); err != nil {
+			out.Printf("\r <err> run: %s => %s\n", msg, err)
+		}
+	} else {
+		out.Printf("run 'pgrep Runner.Listener' to find PID")
 	}
 }
 

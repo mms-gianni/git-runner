@@ -10,7 +10,8 @@ func cmdRun() *clif.Command {
 		githubcommands.Run(c, in, out)
 	}
 
-	return clif.NewCommand("run", "Start a new runner", cb)
+	return clif.NewCommand("run", "Start a new runner", cb).
+		NewFlag("detached", "d", "Start a runner and detach (needs a manual kill)", false)
 }
 
 func init() {

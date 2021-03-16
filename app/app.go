@@ -324,7 +324,11 @@ func printRunners(runners *github.Runners, title string) {
 				statusicon = "online"
 			}
 		}
-		o.Printf("   <%s> %s\n", statusicon, runner.GetName())
+		o.Printf("   <%s> %s   <debug>", statusicon, runner.GetName())
+		for _, label := range runner.Labels {
+			o.Printf("[%s] ", label.GetName())
+		}
+		o.Printf("<reset>\n")
 	}
 	o.Printf("\n")
 }

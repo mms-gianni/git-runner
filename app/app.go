@@ -87,7 +87,7 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateRegistrationToken(ctx, repodetails.owner, repodetails.name)
 		url := "https://github.com/" + repodetails.owner + "/" + repodetails.name
-		runOnOs(out, downloads, url, token, detached)
+		runOnOs(out, downloads, url, token, detached, c.Option("labels").String())
 	}
 
 	if selectedDestI <= len(orgs) {
@@ -96,33 +96,33 @@ func Run(c *clif.Command, in clif.Input, out clif.Output) {
 
 		token, _, _ := client.Actions.CreateOrganizationRegistrationToken(ctx, owner)
 		url := "https://github.com/" + owner
-		runOnOs(out, downloads, url, token, detached)
+		runOnOs(out, downloads, url, token, detached, c.Option("labels").String())
 	}
 }
 
-func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool) {
+func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool, labels string) {
 	for _, download := range downloads {
 		// https://stackoverflow.com/questions/20728767/all-possible-goos-value
 		// possible GetOS values: osx, linux, win
 		// possible GetArchitecture values: x64, arm, arm64
 		if download.GetOS() == "osx" && download.GetArchitecture() == "x64" && runtime.GOOS == "darwin" && runtime.GOARCH == "amd64" {
 			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-			runOnPosix(out, download, url, token, detached)
+			runOnPosix(out, download, url, token, detached, labels)
 			break
 		}
 		if download.GetOS() == "linux" && download.GetArchitecture() == "x64" && runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
 			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-			runOnPosix(out, download, url, token, detached)
+			runOnPosix(out, download, url, token, detached, labels)
 			break
 		}
 		if download.GetOS() == "linux" && download.GetArchitecture() == "arm" && runtime.GOOS == "linux" && runtime.GOARCH == "arn" {
 			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-			runOnPosix(out, download, url, token, detached)
+			runOnPosix(out, download, url, token, detached, labels)
 			break
 		}
 		if download.GetOS() == "linux" && download.GetArchitecture() == "arm64" && runtime.GOOS == "linux" && runtime.GOARCH == "arm64" {
 			out.Printf("Start installation for OS:%s Arch:%s\n\n", download.GetOS(), download.GetArchitecture())
-			runOnPosix(out, download, url, token, detached)
+			runOnPosix(out, download, url, token, detached, labels)
 			break
 		}
 		if download.GetOS() == "win" && download.GetArchitecture() == "x64" && runtime.GOOS == "windows" && runtime.GOARCH == "amd64" {
@@ -133,7 +133,7 @@ func runOnOs(out clif.Output, downloads []*github.RunnerApplicationDownload, url
 	}
 }
 
-func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool) {
+func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url string, token *github.RegistrationToken, detached bool, labels string) {
 	var err error
 	var cmd *exec.Cmd
 
@@ -189,7 +189,12 @@ func runOnPosix(out clif.Output, download *github.RunnerApplicationDownload, url
 		return
 	}
 
-	cmd = exec.Command("/tmp/github_runner/config.sh", "--unattended", "--replace", "--url", url, "--token", token.GetToken())
+	labelsoption := ""
+	if labels != "" {
+		labelsoption = "--labels"
+	}
+
+	cmd = exec.Command("/tmp/github_runner/config.sh", "--unattended", "--replace", "--url", url, "--token", token.GetToken(), labelsoption, labels)
 	out.Printf("    run: %s", cmd.String())
 	err = cmd.Run()
 	if err == nil {

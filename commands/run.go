@@ -11,6 +11,7 @@ func cmdRun() *clif.Command {
 	}
 
 	return clif.NewCommand("run", "Start a new runner", cb).
+		NewOption("labels", "l", "Adds labels to runner (comma separated)", "", false, false).
 		NewFlag("detached", "d", "Start a runner and detach (needs a manual kill)", false)
 }
 

@@ -42,7 +42,7 @@ func GetGitdir() (gitBasedir *string, repo *git.Repository) {
 
 func getRepodetails(repo *git.Repository) (r *repoDetails) {
 	remotes, _ := repo.Remotes()
-	re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
+	re := regexp.MustCompile(`[git@|https://]github.com[:,/](.*)/(.*)\.git \(fetch\)`)
 	findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
 
 	repodetails := repoDetails{owner: findings[0][1], name: findings[0][2]}

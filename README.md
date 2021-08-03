@@ -39,6 +39,15 @@ chmod +x /usr/local/bin/git-runner
 ### Windows
 Windows is not implemented yet. But I'm working on it. Pullrequests wellcome. 
 
+### Docker
+```
+cd git-runner
+echo 'export GITHUB_TOKEN="XXXXXXXXXXXXXXXXXXXXXXX"' >> .env
+echo 'export GITHUB_USERNAME="change-me-to-your-username"' >> .env
+echo 'export GITHUB_ORGANISATIONS="klustair,kubernetes"' >> .env
+docker-compose up -d
+```
+
 ## Quick start
 
 ### Show status of runners

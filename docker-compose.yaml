@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+  gitrunner-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gitrunner-cli:latest
+    container_name: gitrunner
+    command: ["tail", "-f", "/dev/null"]
+    restart: on-failure
+    working_dir: /
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USERNAME=${GITHUB_USERNAME}
+      - GITHUB_ORGANISATIONS=${GITHUB_ORGANISATIONS}
+    volumes:
+      - ./cmd/git-runner:/usr/local/bin/git-runner-dev

@@ -15,3 +15,5 @@
 # vendor/
 
 notes.txt
+
+.env

@@ -1,0 +1,53 @@
+name: Docker rebuild
+
+on: 
+  schedule:
+    - cron: '15 20 * * 0'
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: gitrunner-cli
+
+jobs:
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        versiontag: ["main", "tags/v1.0.0"]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: git checkout ${{ matrix.versiontag }}
+
+      - name: Build image ${{ matrix.versiontag }}
+        run: | 
+          docker build . --file Dockerfile --tag ${IMAGE_NAME}
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image ghcr.io
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ matrix.versiontag }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          # [[ "${{ matrix.versiontag }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag ${IMAGE_NAME} $IMAGE_ID:${VERSION}
+          docker push $IMAGE_ID:${VERSION}

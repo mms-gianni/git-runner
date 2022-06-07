@@ -54,8 +54,8 @@ dockers:
     ids:
       - git-runner
     image_templates:
-      - "ghcr.io/mmz-gianni/git-runner:{{ .Version }}"
-      - "ghcr.io/mmz-gianni/git-runner:latest"
+      - "ghcr.io/mms-gianni/git-runner:{{ .Version }}"
+      - "ghcr.io/mms-gianni/git-runner:latest"
 brews:
   -
     tap:

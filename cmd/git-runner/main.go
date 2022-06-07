@@ -20,8 +20,9 @@ func addDefaultOptions(cli *clif.Cli) {
 	cli.AddDefaultOptions(githubtoken, githubusername, githubOrganisations)
 }
 
-//go:embed DEVELOPMENT
-var version string
+var (
+	version = "dev"
+)
 
 func main() {
 	cli := clif.New("git-runner", version, "Manage your github runners with git cli")

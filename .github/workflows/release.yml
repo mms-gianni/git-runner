@@ -32,12 +32,6 @@ jobs:
         username: mms-gianni
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Bump version
-      id: bump_version
-      run: | 
-        export VERSION=$(echo ${{ github.ref }} | awk -F'/' '{print $3}')
-        sed -i "s/latest/$VERSION/g" cmd/git-runner/VERSION
-
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2
       with:

@@ -20,7 +20,6 @@ builds:
     goarm:
       - '7'
     ignore:
-      - goos: darwin
       # modernc.org/sqlite doesn't support the following pairs
       - goos: windows
         goarch: arm64

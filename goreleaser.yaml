@@ -56,12 +56,11 @@ dockers:
     image_templates:
       - "ghcr.io/mms-gianni/git-runner:{{ .Version }}"
       - "ghcr.io/mms-gianni/git-runner:latest"
-brews:
-  -
-    tap:
-      owner: mms-gianni
-      name: homebrew-git-runner
-    homepage: "https://github.com/klustair/git-runner"
-    description: "Manage your github runners with git"
-    test: |
-      system "#{bin}/git-runner", "--version"
+#brews:
+#  - tap:
+#      owner: mms-gianni
+#      name: homebrew-git-runner
+#    homepage: "https://github.com/klustair/git-runner"
+#    description: "Manage your github runners with git"
+#    test: |
+#      system "#{bin}/git-runner", "--version"

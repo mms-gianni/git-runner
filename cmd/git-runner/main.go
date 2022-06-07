@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"os"
 
 	"github.com/mms-gianni/git-runner/commands"
@@ -19,8 +20,11 @@ func addDefaultOptions(cli *clif.Cli) {
 	cli.AddDefaultOptions(githubtoken, githubusername, githubOrganisations)
 }
 
+//go:embed VERSION
+var version string
+
 func main() {
-	cli := clif.New("git-runner", "DEV-VERSION", "Manage your github runners with git cli")
+	cli := clif.New("git-runner", version, "Manage your github runners with git cli")
 
 	var OwnStyles = map[string]string{
 		"error":     "\033[31;1m",

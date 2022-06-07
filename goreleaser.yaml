@@ -21,6 +21,9 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    files:
+      - README.md
+      - LICENSE
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -31,6 +34,15 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+dockers:
+  - dockerfile: 'Dockerfile'
+    goos: linux
+    goarch: amd64
+    ids:
+      - git-runner
+    image_templates:
+      - "ghcr.io/mmz-gianni/git-runner:{{ .Version }}"
+      - "ghcr.io/mmz-gianni/git-runner:latest"
 brews:
   -
     tap:

@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: gitrunner-cli:latest
+    image: git-runner:latest
     container_name: gitrunner
     command: ["tail", "-f", "/dev/null"]
     restart: on-failure

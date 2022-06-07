@@ -20,7 +20,7 @@ func addDefaultOptions(cli *clif.Cli) {
 	cli.AddDefaultOptions(githubtoken, githubusername, githubOrganisations)
 }
 
-//go:embed VERSION
+//go:embed DEVELOPMENT
 var version string
 
 func main() {

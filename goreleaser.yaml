@@ -14,6 +14,21 @@ builds:
       - linux
       - windows
       - darwin
+    goarch:
+      - amd64
+      - '386'
+      - arm
+      - arm64
+    goarm:
+      - '7'
+    ignore:
+      - goos: darwin
+        goarch: '386'
+      # modernc.org/sqlite doesn't support the following pairs
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
     ldflags:
       - -X main.version={{.Version}}
 archives:
@@ -40,6 +55,7 @@ dockers:
   - dockerfile: 'Dockerfile'
     goos: linux
     goarch: amd64
+    use: buildx
     ids:
       - git-runner
     image_templates:

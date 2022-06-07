@@ -53,8 +53,8 @@ dockers:
     ids:
       - git-runner
     image_templates:
-      - "ghcr.io/mms-gianni/git-runner:{{ .Version }}"
-      - "ghcr.io/mms-gianni/git-runner:latest"
+      - "ghcr.io/{{ .Env.GITHUB_ACTION_REPOSITORY }}:{{ .Version }}"
+      - "ghcr.io/{{ .Env.GITHUB_ACTION_REPOSITORY }}:latest"
 #brews:
 #  - tap:
 #      owner: mms-gianni

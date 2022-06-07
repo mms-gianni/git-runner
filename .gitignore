@@ -17,3 +17,5 @@
 notes.txt
 
 .env
+
+cmd/git-runner/VERSION

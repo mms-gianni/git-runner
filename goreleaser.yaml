@@ -49,6 +49,7 @@ dockers:
   - dockerfile: 'Dockerfile'
     goos: linux
     goarch: amd64
+    goamd64: 'v1'
     use: buildx
     ids:
       - git-runner
